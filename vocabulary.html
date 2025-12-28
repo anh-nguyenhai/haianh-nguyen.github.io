@@ -29,6 +29,7 @@
                 border: 1px solid #e8e8e8;
                 border-radius: 5px;
                 text-align: right;
+                z-index: 1000;
             }
             
             .site-nav label[for="nav-trigger"] {
@@ -36,8 +37,9 @@
                 float: right;
                 width: 36px;
                 height: 36px;
-                z-index: 2;
+                z-index: 1001;
                 cursor: pointer;
+                position: relative;
             }
             
             .site-nav .menu-icon {
@@ -48,12 +50,26 @@
                 line-height: 0;
                 padding-top: 10px;
                 text-align: center;
+                cursor: pointer;
+                pointer-events: auto;
+            }
+            
+            .site-nav .menu-icon svg {
+                pointer-events: none;
             }
             
             .site-nav .page-link {
                 display: block;
                 padding: 5px 10px;
                 margin-left: 20px;
+                position: relative;
+                z-index: 1002;
+                color: #111;
+                text-decoration: none;
+            }
+            
+            .site-nav .page-link:hover {
+                color: #2a7ae2;
             }
         }
         
@@ -253,7 +269,7 @@
 <body>
     <header class="site-header" role="banner">
         <div class="wrapper">
-            <a class="site-title" href="index.html">Hai Anh Nguyen</a>
+            <a class="site-title" href="/">Hai Anh Nguyen</a>
             <nav class="site-nav">
                 <input type="checkbox" id="nav-trigger" class="nav-trigger" />
                 <label for="nav-trigger">
@@ -521,6 +537,33 @@
 
         // Initial display
         displayCard();
+
+        // Mobile menu toggle
+        const navTrigger = document.getElementById('nav-trigger');
+        const menuIcon = document.querySelector('.menu-icon');
+        const navTrigger2 = document.querySelector('.site-nav .trigger');
+        
+        if (menuIcon && navTrigger2) {
+            menuIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                navTrigger.checked = !navTrigger.checked;
+                
+                if (navTrigger.checked) {
+                    navTrigger2.style.display = 'block';
+                } else {
+                    navTrigger2.style.display = '';
+                }
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.site-nav')) {
+                    navTrigger.checked = false;
+                    navTrigger2.style.display = '';
+                }
+            });
+        }
     </script>
 </body>
 
