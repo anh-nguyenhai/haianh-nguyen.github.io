@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>English Vocabulary - Hai Anh Nguyen</title>
+    <meta name="description" content="Interactive flashcards for learning English vocabulary">
+    <link rel="stylesheet" href="style/main.css">
+    <style>
+        .vocab-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 2px solid #2a7ae2;
+            background: white;
+            color: #2a7ae2;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Lora', serif;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #2a7ae2;
+            color: white;
+        }
+
+        .flashcard-wrapper {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .word {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .phonetic {
+            font-size: 24px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .word-type {
+            font-size: 18px;
+            font-style: italic;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .meaning {
+            font-size: 24px;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .example {
+            font-size: 18px;
+            font-style: italic;
+            opacity: 0.9;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            background: #2a7ae2;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Lora', serif;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #1756a9;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .mastered-checkbox {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .mastered-checkbox label {
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mastered-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .hint {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .flashcard {
+                height: 350px;
+            }
+
+            .word {
+                font-size: 36px;
+            }
+
+            .meaning {
+                font-size: 20px;
+            }
+
+            .phonetic {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header" role="banner">
+        <div class="wrapper">
+            <a class="site-title" href="/">Hai Anh Nguyen</a>
+            <nav class="site-nav">
+                <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+                <label for="nav-trigger">
+                    <span class="menu-icon">
+                        <svg viewBox="0 0 18 15" width="18px" height="15px">
+                            <path fill="#424242"
+                                d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z">
+                            </path>
+                            <path fill="#424242"
+                                d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z">
+                            </path>
+                            <path fill="#424242"
+                                d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z">
+                            </path>
+                        </svg>
+                    </span>
+                </label>
+                <div class="trigger">
+                    <a class="page-link" href="blog.html">Blog</a>
+                    <a class="page-link" href="bucket_list.html">List 100</a>
+                    <a class="page-link" href="vocabulary.html">English Vocabulary</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main aria-label="Content">
+        <div class="vocab-container">
+            <h1 style="text-align: center; margin-bottom: 30px; color: #333;">English Vocabulary Flashcards</h1>
+
+            <div class="category-filter">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="academic">Academic</button>
+                <button class="category-btn" data-category="research">Research</button>
+                <button class="category-btn" data-category="ielts">IELTS</button>
+                <button class="category-btn" data-category="advanced">Advanced</button>
+            </div>
+
+            <div class="flashcard-wrapper">
+                <div class="flashcard" id="flashcard">
+                    <div class="card-face card-front">
+                        <div class="word" id="word"></div>
+                        <div class="phonetic" id="phonetic"></div>
+                        <div class="word-type" id="word-type"></div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="meaning" id="meaning"></div>
+                        <div class="example" id="example"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hint">💡 Click the card to flip</div>
+
+            <div class="mastered-checkbox">
+                <label>
+                    <input type="checkbox" id="mastered">
+                    <span>Mark as mastered</span>
+                </label>
+            </div>
+
+            <div class="navigation">
+                <button class="nav-btn" id="prev-btn">← Previous</button>
+                <div class="progress" id="progress"></div>
+                <button class="nav-btn" id="next-btn">Next →</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrapper">
+            <h2 class="footer-heading">Nguyen Hai Anh</h2>
+            <div class="footer-col-wrapper">
+                <div class="footer-col footer-col-1">
+                    <ul class="contact-list">
+                        <li><a href="mailto:nguyenhaianh232@gmail.com">nguyenhaianh232@gmail.com</a></li>
+                        <li><a href="https://github.com/nguyenhaianh-captain">GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Vocabulary database
+        const vocabulary = [
+            {
+                word: "Paradigm",
+                phonetic: "/ˈpærədaɪm/",
+                type: "noun",
+                meaning: "A typical example or pattern of something; a model",
+                example: "The discovery shifted the scientific paradigm completely.",
+                category: "academic"
+            },
+            {
+                word: "Empirical",
+                phonetic: "/ɪmˈpɪrɪkl/",
+                type: "adjective",
+                meaning: "Based on observation or experience rather than theory",
+                example: "The study provided empirical evidence for the hypothesis.",
+                category: "research"
+            },
+            {
+                word: "Mitigate",
+                phonetic: "/ˈmɪtɪɡeɪt/",
+                type: "verb",
+                meaning: "To make less severe, serious, or painful",
+                example: "Measures were taken to mitigate the environmental impact.",
+                category: "ielts"
+            },
+            {
+                word: "Ubiquitous",
+                phonetic: "/juːˈbɪkwɪtəs/",
+                type: "adjective",
+                meaning: "Present, appearing, or found everywhere",
+                example: "Smartphones have become ubiquitous in modern society.",
+                category: "advanced"
+            },
+            {
+                word: "Inference",
+                phonetic: "/ˈɪnfərəns/",
+                type: "noun",
+                meaning: "A conclusion reached based on evidence and reasoning",
+                example: "Statistical inference is crucial in machine learning.",
+                category: "research"
+            },
+            {
+                word: "Synthesize",
+                phonetic: "/ˈsɪnθəsaɪz/",
+                type: "verb",
+                meaning: "Combine elements to form a connected whole",
+                example: "The researcher synthesized data from multiple sources.",
+                category: "academic"
+            },
+            {
+                word: "Proliferate",
+                phonetic: "/prəˈlɪfəreɪt/",
+                type: "verb",
+                meaning: "Increase rapidly in number; multiply",
+                example: "AI applications have proliferated across industries.",
+                category: "ielts"
+            },
+            {
+                word: "Ephemeral",
+                phonetic: "/ɪˈfemərəl/",
+                type: "adjective",
+                meaning: "Lasting for a very short time",
+                example: "The beauty of cherry blossoms is ephemeral.",
+                category: "advanced"
+            },
+            {
+                word: "Methodology",
+                phonetic: "/ˌmeθəˈdɒlədʒi/",
+                type: "noun",
+                meaning: "A system of methods used in a particular field",
+                example: "The research methodology was clearly outlined.",
+                category: "research"
+            },
+            {
+                word: "Convoluted",
+                phonetic: "/ˈkɒnvəluːtɪd/",
+                type: "adjective",
+                meaning: "Extremely complex and difficult to follow",
+                example: "The legal document was unnecessarily convoluted.",
+                category: "advanced"
+            }
+        ];
+
+        let currentIndex = 0;
+        let currentCategory = 'all';
+        let filteredVocab = [...vocabulary];
+        let masteredWords = new Set(JSON.parse(localStorage.getItem('masteredWords') || '[]'));
+
+        const flashcard = document.getElementById('flashcard');
+        const wordEl = document.getElementById('word');
+        const phoneticEl = document.getElementById('phonetic');
+        const typeEl = document.getElementById('word-type');
+        const meaningEl = document.getElementById('meaning');
+        const exampleEl = document.getElementById('example');
+        const progressEl = document.getElementById('progress');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const masteredCheckbox = document.getElementById('mastered');
+
+        // Flip card on click
+        flashcard.addEventListener('click', function() {
+            this.classList.toggle('flipped');
+        });
+
+        // Category filter
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                filterVocabulary();
+            });
+        });
+
+        function filterVocabulary() {
+            if (currentCategory === 'all') {
+                filteredVocab = [...vocabulary];
+            } else {
+                filteredVocab = vocabulary.filter(v => v.category === currentCategory);
+            }
+            currentIndex = 0;
+            displayCard();
+        }
+
+        function displayCard() {
+            const card = filteredVocab[currentIndex];
+            wordEl.textContent = card.word;
+            phoneticEl.textContent = card.phonetic;
+            typeEl.textContent = card.type;
+            meaningEl.textContent = card.meaning;
+            exampleEl.textContent = `"${card.example}"`;
+            
+            progressEl.textContent = `${currentIndex + 1} / ${filteredVocab.length}`;
+            
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === filteredVocab.length - 1;
+            
+            // Check if word is mastered
+            masteredCheckbox.checked = masteredWords.has(card.word);
+            
+            // Reset flip
+            flashcard.classList.remove('flipped');
+        }
+
+        // Navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayCard();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < filteredVocab.length - 1) {
+                currentIndex++;
+                displayCard();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') prevBtn.click();
+            if (e.key === 'ArrowRight') nextBtn.click();
+            if (e.key === ' ') {
+                e.preventDefault();
+                flashcard.click();
+            }
+        });
+
+        // Mastered checkbox
+        masteredCheckbox.addEventListener('change', function() {
+            const word = filteredVocab[currentIndex].word;
+            if (this.checked) {
+                masteredWords.add(word);
+            } else {
+                masteredWords.delete(word);
+            }
+            localStorage.setItem('masteredWords', JSON.stringify([...masteredWords]));
+        });
+
+        // Initial display
+        displayCard();
+    </script>
+</body>
+
+</html>
